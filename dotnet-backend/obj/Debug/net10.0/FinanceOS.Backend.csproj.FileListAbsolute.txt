@@ -1,0 +1,93 @@
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.csproj.AssemblyReference.cache
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.AssemblyInfoInputs.cache
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.AssemblyInfo.cs
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.csproj.CoreCompileInputs.cache
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\appsettings.Development.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\appsettings.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.staticwebassets.endpoints.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.exe
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.deps.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.runtimeconfig.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.pdb
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\ClosedXML.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\ClosedXML.Parser.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\CsvHelper.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\DocumentFormat.OpenXml.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\DocumentFormat.OpenXml.Framework.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\ExcelNumberFormat.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FuzzySharp.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\Microsoft.OpenApi.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\RBush.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\SixLabors.Fonts.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\System.IO.Packaging.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\rjimswa.dswa.cache.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\scopedcss\bundle\FinanceOS.Backend.styles.css
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\staticwebassets.build.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\staticwebassets.build.json.cache
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\staticwebassets.development.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\staticwebassets.build.endpoints.json
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\swae.build.ex.cache
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceO.776C20E5.Up2Date
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\refint\FinanceOS.Backend.dll
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.pdb
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.genruntimeconfig.cache
+C:\Users\niraj\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\ref\FinanceOS.Backend.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\appsettings.Development.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\appsettings.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\metadata.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.staticwebassets.endpoints.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.exe
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.deps.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.runtimeconfig.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FinanceOS.Backend.pdb
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\ClosedXML.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\ClosedXML.Parser.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\CsvHelper.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\DocumentFormat.OpenXml.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\DocumentFormat.OpenXml.Framework.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\ExcelNumberFormat.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\FuzzySharp.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\Microsoft.OpenApi.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\RBush.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\SixLabors.Fonts.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\bin\Debug\net10.0\System.IO.Packaging.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.csproj.AssemblyReference.cache
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.AssemblyInfoInputs.cache
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.AssemblyInfo.cs
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.csproj.CoreCompileInputs.cache
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\rjimswa.dswa.cache.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\scopedcss\bundle\FinanceOS.Backend.styles.css
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\staticwebassets.build.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\staticwebassets.build.json.cache
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\staticwebassets.development.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\staticwebassets.build.endpoints.json
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\swae.build.ex.cache
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceO.776C20E5.Up2Date
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\refint\FinanceOS.Backend.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.pdb
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.genruntimeconfig.cache
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\ref\FinanceOS.Backend.dll
