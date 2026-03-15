@@ -50,11 +50,14 @@ namespace FinanceOS.Backend.Services
 
             var qcReport = new QCReport();
             var (periodStart, periodEnd) = GetPeriodBounds(filters);
+            var workingDaysInPeriod = GetWorkingDays(periodStart, periodEnd);
 
             // 1. Initialize resource map
             var resources = new Dictionary<string, ResourceReportRow>();
             var rateMap = rateCard.Where(r => !string.IsNullOrEmpty(r.Name))
                                   .ToDictionary(r => r.Name.Trim(), r => r.Function ?? "Unknown");
+
+            var jiraAuthors = jiraDump.Select(j => (j.Author ?? "").Trim()).Where(a => !string.IsNullOrEmpty(a)).Distinct().ToHashSet();
 
             foreach (var row in resourceMaster)
             {
@@ -71,37 +74,27 @@ namespace FinanceOS.Backend.Services
                 var reqH = effStart <= effEnd ? GetWorkingDays(effStart, effEnd) * 8 : 0;
                 var func = rateMap.ContainsKey(formalName) ? rateMap[formalName] : "Unknown";
 
+                var missingJiraId = !jiraAuthors.Contains(name);
+
                 resources[name] = new ResourceReportRow
                 {
                     ResourceName = name,
                     FormalName = formalName,
                     Function = func,
-                    RequiredHours = reqH
+                    RequiredHours = reqH,
+                    MissingJiraID = missingJiraId // "Please create Jira ID" flag logic
                 };
             }
 
-            // 2. Pre-scan Jira for Total Uncapped Hours
-            foreach (var row in jiraDump)
-            {
-                var author = (row.Author ?? "").Trim();
-                var timeSpent = row.TimeSpentHrs;
-                if (!string.IsNullOrEmpty(author))
-                {
-                    if (resources.ContainsKey(author))
-                    {
-                        // Custom property would be needed, but we can use a local tracking dict or just add to the model
-                        // For simplicity, let's assume ExternalHours (temporary) or some other way.
-                    }
-                    else if (timeSpent > 0)
-                    {
-                        resources[author] = new ResourceReportRow
-                        {
-                            ResourceName = author,
-                            FormalName = author,
-                            Function = "Unknown",
-                            RequiredHours = 0
-                        };
-                    }
+            // Fallback for Jira authors not in Resource List
+            foreach (var author in jiraAuthors) {
+                if (!resources.ContainsKey(author)) {
+                    resources[author] = new ResourceReportRow {
+                        ResourceName = author,
+                        FormalName = author,
+                        RequiredHours = workingDaysInPeriod * 8, // they logged time without being in list
+                        MissingJiraID = false
+                    };
                 }
             }
 
@@ -144,7 +137,7 @@ namespace FinanceOS.Backend.Services
                     qcReport.UnknownCategories.Add(row.ProjectCategory);
             }
 
-            // 4. Incorporate Attendance
+            // 4. Incorporate Attendance (Override Leaves)
             foreach (var att in attendanceSummary)
             {
                 var matchedName = att.MatchedName ?? att.ResourceName;
@@ -154,41 +147,27 @@ namespace FinanceOS.Backend.Services
                 }
             }
 
-            // 5. Compute metrics
+            // 5. Compute metrics & Defaulters
             var reportData = new List<ResourceReportRow>();
             foreach (var r in resources.Values)
             {
+                var authTotalUncapped = totalUncappedJira.GetValueOrDefault(r.ResourceName, 0);
+                r.TotalJiraHours = authTotalUncapped;
+
                 var actualLeaves = r.ActualLeaveDays > 0 ? r.ActualLeaveDays : (r.Leaves_Hours_Jira / 8);
-                double extraLeaveHours = 0;
-                if (actualLeaves > (r.Leaves_Hours_Jira / 8))
-                {
-                    extraLeaveHours = (actualLeaves - (r.Leaves_Hours_Jira / 8)) * 8;
-                    r.Leaves_Hours_Final = r.Leaves_Hours_Jira + extraLeaveHours;
-                }
-                else
-                {
-                    r.Leaves_Hours_Final = r.Leaves_Hours_Jira;
-                }
-                r.ActualLeaveDays = actualLeaves;
+                r.Leaves_Hours_Final = Math.Max(r.Leaves_Hours_Jira, actualLeaves * 8);
+
+                // Bench Hours
+                double loggedNonBench = r.ExternalHours + r.InternalHours + r.CAAPL_Hours + r.LND_Hours + r.Sales_Hours + r.Leaves_Hours_Final;
+                double nativeBench = r.RequiredHours > loggedNonBench ? r.RequiredHours - loggedNonBench : 0;
+                r.Bench_Hours_Jira = authTotalUncapped == 0 ? r.RequiredHours : nativeBench; // Spec adjusted bench
+                r.AdjustedBench = r.Bench_Hours_Jira; 
+
+                r.TotalCappedHours = r.ExternalHours + r.InternalHours + r.CAAPL_Hours + r.LND_Hours + r.Sales_Hours + r.Leaves_Hours_Final + r.AdjustedBench;
 
                 var R = r.RequiredHours;
-                var totalNonBenchJira = r.ExternalHours + r.InternalHours + r.CAAPL_Hours + r.LND_Hours + r.Sales_Hours + r.Leaves_Hours_Jira;
-                var missing = R - totalNonBenchJira;
-                r.AdjustedBench = missing > 0 ? missing : 0;
 
-                double finalBench = r.Bench_Hours_Jira + r.AdjustedBench;
-                if (actualLeaves > (r.Leaves_Hours_Jira / 8))
-                {
-                    finalBench -= extraLeaveHours;
-                }
-                r.FinalBench = Math.Max(0, finalBench);
-
-                r.TotalAllocated = r.ExternalHours + r.InternalHours + r.CAAPL_Hours + r.LND_Hours + r.Sales_Hours + r.Leaves_Hours_Final + r.FinalBench;
-                r.CrossCheckDelta = r.TotalAllocated - R;
-
-                if (Math.Abs(r.CrossCheckDelta) > 0.01)
-                    qcReport.FailedCrossChecks.Add(new { name = r.ResourceName, delta = r.CrossCheckDelta });
-
+                // Productivity metrics
                 var denom = R - r.Leaves_Hours_Final;
                 if (denom <= 0)
                 {
@@ -201,11 +180,32 @@ namespace FinanceOS.Backend.Services
                     r.OverallBillability = (r.InternalHours + r.ExternalHours) / denom;
                 }
                 r.InternalProductivity = R > 0 ? (r.InternalHours + r.CAAPL_Hours + r.LND_Hours) / R : 0;
-                r.BenchPercent = R > 0 ? r.FinalBench / R : 0;
+                r.BenchPercent = R > 0 ? r.AdjustedBench / R : 0;
+
+                // Defaulter Logic
+                var missingHours = Math.Max(0, R - authTotalUncapped);
+                
+                string flag = "";
+                if (r.MissingJiraID) flag = "No Jira ID";
+                else if (authTotalUncapped == 0) flag = "No logs";
+                else if (missingHours > 0) flag = "Partial logs";
+
+                if (!string.IsNullOrEmpty(flag)) {
+                    qcReport.Defaulters.Add(new {
+                        ResourceName = r.FormalName,
+                        JiraTotalHours = authTotalUncapped,
+                        RequiredHours = R,
+                        MissingHours = missingHours,
+                        Flag = flag
+                    });
+                }
 
                 reportData.Add(r);
             }
 
+            // Sort defaulters ascending by filled time spent (JiraTotalHours) as per spec
+            qcReport.Defaulters = qcReport.Defaulters.OrderBy(d => (double)d.GetType().GetProperty("JiraTotalHours").GetValue(d, null)).ToList();
+            
             // 6. Summary Aggregates
             var filteredExt = reportData.Where(r => r.ExternalProductivity.HasValue).ToList();
             var filteredInt = reportData.Where(r => r.InternalProductivity.HasValue).ToList();
@@ -234,7 +234,6 @@ namespace FinanceOS.Backend.Services
         {
             var start = new DateTime(2024, 4, 1);
             var end = DateTime.Now;
-            // Mirror logic from Node.js if needed
             return (start, end);
         }
 

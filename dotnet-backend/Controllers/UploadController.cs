@@ -151,8 +151,11 @@ namespace FinanceOS.Backend.Controllers
                 Author = d.GetValueOrDefault("author")?.ToString() ?? "",
                 Project = d.GetValueOrDefault("project")?.ToString() ?? "",
                 Issue = d.GetValueOrDefault("issue")?.ToString() ?? "",
+                Epic = d.GetValueOrDefault("epic")?.ToString(),
                 ProjectCategory = d.GetValueOrDefault("projectcategory")?.ToString() ?? d.GetValueOrDefault("project category")?.ToString(),
-                TimeSpentHrs = double.TryParse(d.GetValueOrDefault("timespent(hrs)")?.ToString() ?? d.GetValueOrDefault("time spent (hrs)")?.ToString(), out var ts) ? ts : 0
+                TimeSpentHrs = double.TryParse(d.GetValueOrDefault("timespent(hours)")?.ToString() ?? d.GetValueOrDefault("time spent (hours)")?.ToString() ?? "0", out var ts) ? ts : 0,
+                OriginalEstimateHrs = double.TryParse(d.GetValueOrDefault("originalestimate")?.ToString() ?? "0", out var oe) ? oe : null,
+                Date = DateTime.TryParse(d.GetValueOrDefault("startedday")?.ToString(), out var dt) ? dt : null
             }).ToList();
         }
 
@@ -160,7 +163,8 @@ namespace FinanceOS.Backend.Controllers
         {
             return data.Select(d => new RateCardEntry {
                 Name = d.GetValueOrDefault("name")?.ToString() ?? d.GetValueOrDefault("jiraname")?.ToString() ?? "",
-                MonthlySalary = double.TryParse(d.GetValueOrDefault("monthlysalary")?.ToString() ?? d.GetValueOrDefault("monthly salary")?.ToString(), out var s) ? s : 0,
+                JiraName = d.GetValueOrDefault("jiraname")?.ToString(),
+                MonthlySalary = double.TryParse(d.GetValueOrDefault("monthlysalary")?.ToString() ?? d.GetValueOrDefault("monthly salary")?.ToString() ?? "0", out var s) ? s : 0,
                 Function = d.GetValueOrDefault("function")?.ToString() ?? ""
             }).ToList();
         }
@@ -178,10 +182,16 @@ namespace FinanceOS.Backend.Controllers
         private List<ProjectMasterEntry> MapToProjectMaster(List<Dictionary<string, object>> data)
         {
             return data.Select(d => new ProjectMasterEntry {
-                ProjectName = d.GetValueOrDefault("project")?.ToString() ?? d.GetValueOrDefault("customername")?.ToString() ?? "",
-                ProjectKey = d.GetValueOrDefault("projectkey")?.ToString() ?? d.GetValueOrDefault("clientcode")?.ToString() ?? "",
-                RevenueFY25 = double.TryParse(d.GetValueOrDefault("revenuefy25")?.ToString(), out var r25) ? r25 : 0,
-                RevenueFY26 = double.TryParse(d.GetValueOrDefault("revenuefy26")?.ToString(), out var r26) ? r26 : 0
+                ProjectName = d.GetValueOrDefault("customername")?.ToString() ?? d.GetValueOrDefault("projectname")?.ToString() ?? d.GetValueOrDefault("project")?.ToString() ?? "",
+                Product = d.GetValueOrDefault("product")?.ToString(),
+                Category = d.GetValueOrDefault("projectcategory")?.ToString() ?? d.GetValueOrDefault("category")?.ToString(),
+                ProjectKey = d.GetValueOrDefault("clientcode")?.ToString() ?? d.GetValueOrDefault("projectkey")?.ToString() ?? "",
+                ProjectStatus = d.GetValueOrDefault("projectstatus")?.ToString() ?? "Active",
+                PoAmount = double.TryParse(d.GetValueOrDefault("poamount")?.ToString() ?? "0", out var po) ? po : 0,
+                RevenueFY25 = double.TryParse(d.GetValueOrDefault("revenuefy25")?.ToString() ?? "0", out var r25) ? r25 : 0,
+                RevenueFY26 = double.TryParse(d.GetValueOrDefault("revenuefy26")?.ToString() ?? "0", out var r26) ? r26 : 0,
+                TotalSignedHRCost = double.TryParse(d.GetValueOrDefault("totalsignedhrcost")?.ToString() ?? "0", out var tc) ? tc : 0,
+                CostTillLastQuarter = double.TryParse(d.GetValueOrDefault("costtilllastquarter")?.ToString() ?? "0", out var ctlq) ? ctlq : 0
             }).ToList();
         }
     }

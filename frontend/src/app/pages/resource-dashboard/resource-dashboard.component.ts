@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../../components/header/header.component';
 import { FinanceApiService } from '../../services/finance-api.service';
 import { DataProcessingService } from '../../services/data-processing.service';
+import { FilterService } from '../../services/filter.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-resource-dashboard',
@@ -24,68 +26,23 @@ import { DataProcessingService } from '../../services/data-processing.service';
     </div>
 
     <ng-container *ngIf="data">
-      <!-- Dynamic Filter Bar -->
-      <div class="filter-bar" [style.opacity]="loading ? '0.5' : '1'">
-          <div class="filter-group">
-              <label>Financial Year</label>
-              <select [(ngModel)]="filters.year" (change)="applyFilters()">
-                  <option value="All">All Years</option>
-                  <option value="FY25">FY 2024-25</option>
-                  <option value="FY26">FY 2025-26</option>
-              </select>
-          </div>
-          <div class="filter-group">
-              <label>Quarter</label>
-              <select [(ngModel)]="filters.quarter" (change)="onQuarterChange()">
-                  <option value="All">All Quarters</option>
-                  <option value="Q1">Q1 (Apr-Jun)</option>
-                  <option value="Q2">Q2 (Jul-Sep)</option>
-                  <option value="Q3">Q3 (Oct-Dec)</option>
-                  <option value="Q4">Q4 (Jan-Mar)</option>
-              </select>
-          </div>
-          <div class="filter-group">
-              <label>Month</label>
-              <select [(ngModel)]="filters.month" (change)="applyFilters()">
-                  <option value="All">All Months</option>
-                  <option *ngFor="let m of availableMonths" [value]="m">{{m}}</option>
-              </select>
-          </div>
-          <div style="flex: 0;">
-              <button (click)="resetFilters()" class="btn-ghost" style="padding: 10px 16px;">Reset</button>
-          </div>
-      </div>
-
-      <!-- KPI Panels -->
+    <ng-container *ngIf="data">
       <div class="kpi-row" [style.opacity]="loading ? '0.5' : '1'">
           <div class="kpi-panel">
-              <div class="tag">Total Mapped Resources</div>
+              <div class="tag">Total Resources</div>
               <div class="amount">{{ summary.totalResources }}</div>
-              <div class="growth" style="color: #10b981;">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                  </svg>
-                  Headcount
-              </div>
           </div>
           <div class="kpi-panel">
-              <div class="tag">Timesheet Hours Driven</div>
-              <div class="amount">{{ summary.totalHours }}</div>
-              <div class="growth" style="color: var(--text-muted);">
-                  Productive time
-              </div>
+              <div class="tag">Avg Billability</div>
+              <div class="amount">{{ (summary.avgOverallBillability * 100).toFixed(1) }}%</div>
           </div>
           <div class="kpi-panel">
-              <div class="tag">Direct Salary Cost Allocated</div>
-              <div class="amount">{{ dataProc.formatCurrency(summary.totalCost) }}</div>
-              <div class="growth">Financial Impact</div>
+              <div class="tag">Avg External Productivity</div>
+              <div class="amount">{{ (summary.avgExternalProductivity * 100).toFixed(1) }}%</div>
           </div>
           <div class="kpi-panel">
-              <div class="tag">Utilization Benchmark</div>
-              <div class="amount">Tracking</div>
-              <div class="growth">
-                  <span class="badge-pill bg-emerald">Healthy</span>
-              </div>
+              <div class="tag">Bench %</div>
+              <div class="amount">{{ (summary.avgBench * 100).toFixed(1) }}%</div>
           </div>
       </div>
 
@@ -94,33 +51,58 @@ import { DataProcessingService } from '../../services/data-processing.service';
               <h3 style="margin:0; font-weight: 800;">Resource Extraction Ledger</h3>
           </div>
           <div style="overflow-x: auto; border-radius: 0 0 12px 12px; margin-bottom: 20px;">
-              <table style="width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1000px;">
+              <table style="width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1800px;">
                   <thead>
                       <tr>
                           <th style="position: sticky; left: 0; z-index: 10; background: #f8fafc;">Resource Name</th>
-                          <th>Project Code</th>
-                          <th>Mapped Project Name</th>
-                          <th>Total Hours</th>
-                          <th>Calculated Apportioned Cost</th>
+                          <th>Function</th>
+                          <th>FY-Quarter</th>
+                          <th>Jira Total Hours</th>
+                          <th>Required Hours</th>
+                          <th>Capped Hours</th>
+                          <th>External</th>
+                          <th>Internal</th>
+                          <th>CAAPL</th>
+                          <th>LND</th>
+                          <th>Sales</th>
+                          <th>Leaves</th>
+                          <th>Bench</th>
+                          <th>Productivity</th>
+                          <th>Flags</th>
                       </tr>
                   </thead>
                   <tbody>
                       <tr *ngFor="let row of paginatedData">
                           <td style="position: sticky; left: 0; z-index: 5; background: white; font-weight: 700;">
-                               {{ row.resourceName }}
+                               {{ row.formalName || row.resourceName }}
                           </td>
-                          <td style="font-family: monospace;">{{ row.projectCode }}</td>
+                          <td><span class="badge-pill" style="background:#f1f5f9; color:#475569">{{ row.function }}</span></td>
+                          <td>{{ filters.year }}-{{ filters.quarter }}</td>
+                          <td style="font-weight: 600;">{{ row.totalJiraHours.toFixed(1) }}h</td>
+                          <td style="color: var(--text-muted)">{{ row.requiredHours.toFixed(1) }}h</td>
+                          <td style="font-weight: 700;">{{ row.totalCappedHours.toFixed(1) }}h</td>
+                          <td>{{ row.externalHours.toFixed(1) }}</td>
+                          <td>{{ row.internalHours.toFixed(1) }}</td>
+                          <td>{{ row.caapL_Hours.toFixed(1) }}</td>
+                          <td>{{ row.lnD_Hours.toFixed(1) }}</td>
+                          <td>{{ row.sales_Hours.toFixed(1) }}</td>
+                          <td>{{ row.leaves_Hours_Final.toFixed(1) }}</td>
+                          <td>{{ row.adjustedBench.toFixed(1) }}</td>
                           <td>
-                              {{ row.projectName || 'Unmapped / Overhead' }}
-                              <span *ngIf="row.isUnmapped" class="badge-pill" style="background-color: #fef2f2; color: #ef4444; border: 1px solid #fecaca; margin-left: 8px;">
-                                 No P&L Project
-                              </span>
+                              <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem;">
+                                  <span>Bill: {{ (row.overallBillability * 100).toFixed(0) }}%</span>
+                                  <span>Ext: {{ (row.externalProductivity * 100).toFixed(0) }}%</span>
+                              </div>
                           </td>
-                          <td style="font-weight: 600;">{{ row.totalHours }}h</td>
-                          <td style="font-weight: 800; color: var(--primary);">{{ dataProc.formatCurrency(row.apportionedCost) }}</td>
+                          <td>
+                              <div style="display: flex; gap: 4px;">
+                                  <span *ngIf="row.missingJiraID" class="badge-pill bg-amber">Missing ID</span>
+                                  <span *ngIf="row.totalJiraHours === 0" class="badge-pill bg-red">No Logs</span>
+                              </div>
+                          </td>
                       </tr>
                       <tr *ngIf="paginatedData.length === 0">
-                          <td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted);">No resource records matched.</td>
+                          <td colspan="15" style="text-align: center; padding: 32px; color: var(--text-muted);">No resource records matched.</td>
                       </tr>
                   </tbody>
               </table>
@@ -144,40 +126,66 @@ export class ResourceDashboardComponent implements OnInit {
   loading = false;
   Math = Math;
 
-  availableMonths: string[] = [];
-
-  filters = {
-    year: 'All',
-    quarter: 'All',
-    month: 'All'
-  };
-
-  summary: any = {
-    totalResources: 0,
-    totalHours: 0,
-    totalCost: 0
-  };
-
+  filters: any = {};
+  summary: any = {};
   paginatedData: any[] = [];
   currentPage = 1;
-  pageSize = 10;
+  pageSize = 12;
 
-  constructor(private api: FinanceApiService, public dataProc: DataProcessingService) { }
+  private filterSub: Subscription | null = null;
+
+  constructor(
+    private api: FinanceApiService, 
+    public dataProc: DataProcessingService,
+    private filterService: FilterService
+  ) { }
 
   ngOnInit() {
-    this.loadFromCache();
+    this.filterSub = this.filterService.currentFilter$.subscribe(f => {
+      this.filters = f;
+      this.applyFilters();
+    });
   }
 
-  loadFromCache() {
-    const stored = localStorage.getItem('res_dashboard_results');
-    if (stored) {
-      try {
-        this.data = JSON.parse(stored);
-        this.processData();
-      } catch (e) {
-        console.error('Failed to parse cached data', e);
-      }
+  ngOnDestroy() {
+    if (this.filterSub) this.filterSub.unsubscribe();
+  }
+
+  async applyFilters() {
+    this.loading = true;
+    try {
+      const newData = await this.api.calculateResourceReport({
+        year: this.filters.year,
+        quarter: this.filters.quarter,
+        month: this.filters.month
+      });
+      this.data = newData;
+      this.currentPage = 1;
+      this.processData();
+    } catch (err) {
+      console.error('Failed to calculate resource report', err);
+    } finally {
+      this.loading = false;
     }
+  }
+
+  processData() {
+    if (!this.data || !this.data.reportData) return;
+    
+    let report = this.data.reportData;
+    this.summary = this.data.summary || {};
+
+    // Search query filter
+    if (this.filters.searchQuery) {
+      const q = this.filters.searchQuery.toLowerCase();
+      report = report.filter((r: any) => 
+        r.resourceName.toLowerCase().includes(q) || 
+        r.formalName.toLowerCase().includes(q)
+      );
+    }
+
+    this.data.report = report; // for pagination
+    this.updatePagination();
   }
 
   get totalPages() {
@@ -198,68 +206,22 @@ export class ResourceDashboardComponent implements OnInit {
     this.paginatedData = this.data.report.slice(start, end);
   }
 
-  async applyFilters() {
-    this.loading = true;
-    try {
-      const newData = await this.api.calculateResourceReport({
-        year: this.filters.year,
-        quarter: this.filters.quarter,
-        month: this.filters.month
-      });
-      this.data = newData;
-      localStorage.setItem('res_dashboard_results', JSON.stringify(newData));
-      this.currentPage = 1;
-      this.processData();
-    } catch (err) {
-      alert('Failed to calculate resource report with these filters');
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  processData() {
-    if (!this.data || !this.data.report) return;
-
-    // Calculate dynamic summarization
-    const uniqueRes = new Set(this.data.report.map((r: any) => r.resourceName));
-    this.summary.totalResources = uniqueRes.size;
-    this.summary.totalHours = this.data.report.reduce((sum: number, r: any) => sum + r.totalHours, 0);
-    this.summary.totalCost = this.data.report.reduce((sum: number, r: any) => sum + r.apportionedCost, 0);
-
-    this.updatePagination();
-  }
-
-  onQuarterChange() {
-    const qMap: any = {
-      'Q1': ['Apr', 'May', 'Jun'],
-      'Q2': ['Jul', 'Aug', 'Sep'],
-      'Q3': ['Oct', 'Nov', 'Dec'],
-      'Q4': ['Jan', 'Feb', 'Mar']
-    };
-    this.availableMonths = qMap[this.filters.quarter] || [];
-    this.filters.month = 'All';
-    this.applyFilters();
-  }
-
-  resetFilters() {
-    this.filters = { year: 'All', quarter: 'All', month: 'All' };
-    this.availableMonths = [];
-    this.applyFilters();
-  }
-
   exportCSV() {
     if (!this.data || !this.data.report) return;
 
     const headers = [
-      "Resource Name", "Project Code", "Mapped Project Name", "Total Hours", "Apportioned Cost"
+      "Resource Name", "Function", "FY-Quarter", "Jira Total Hours", "Required Hours", 
+      "Capped Hours", "External", "Internal", "CAAPL", "LND", "Sales", "Leaves", "Bench"
     ];
 
     let csv = headers.join(',') + '\n';
 
     this.data.report.forEach((row: any) => {
       const values = [
-        row.resourceName, row.projectCode, row.projectName || 'Unmapped',
-        row.totalHours, row.apportionedCost
+        row.formalName || row.resourceName, row.function, `${this.filters.year}-${this.filters.quarter}`,
+        row.totalJiraHours, row.requiredHours, row.totalCappedHours,
+        row.externalHours, row.internalHours, row.caapL_Hours,
+        row.lnD_Hours, row.sales_Hours, row.leaves_Hours_Final, row.adjustedBench
       ];
       csv += values.map((v: any) => `"${v}"`).join(',') + '\n';
     });
@@ -268,7 +230,7 @@ export class ResourceDashboardComponent implements OnInit {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `FinanceOS_Resource_Extract_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `FinanceOS_Resource_Matrix_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
   }
 

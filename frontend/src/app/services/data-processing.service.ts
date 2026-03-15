@@ -20,11 +20,11 @@ export class DataProcessingService {
     if (files['projectMaster']) {
       const masterData = await this.readExcelOrCSV(files['projectMaster']);
       masterData.forEach((row: any) => {
-        const key = String(row['Project Key'] || row['Key'] || '').trim().toUpperCase();
+        const key = String(row['Project Key'] || row['Key'] || row['Client Code'] || '').trim().toUpperCase();
         if (key) {
           db.projects[key] = {
             ...row,
-            name: row['Project Name'] || row['Name'],
+            name: row['Project Name'] || row['Name'] || row['Customer Name'],
             category: row['Category'] || 'Uncategorized',
             status: row['Status'] || 'Active'
           };
@@ -77,8 +77,17 @@ export class DataProcessingService {
 
       const uniqueDumpProjects = new Set<string>();
       dumpData.forEach((row: any) => {
-        const key = String(row['Project Key'] || row['Project'] || '').trim().toUpperCase();
-        if (key) uniqueDumpProjects.add(key);
+        let key = String(row['Project Key'] || '').trim().toUpperCase();
+        if (!key && row['Issue']) {
+          key = String(row['Issue']).split('-')[0].trim().toUpperCase();
+        }
+        if (!key) {
+          key = String(row['Project'] || '').trim().toUpperCase();
+        }
+        if (key) {
+          uniqueDumpProjects.add(key);
+          row['__DerivedKey'] = key;
+        }
       });
 
       // Cross-Validate: Find Defaulters (Projects in Fin Dump but NOT in Project Master)
@@ -108,10 +117,10 @@ export class DataProcessingService {
     usedKeys.forEach(key => {
       const p = db.projects[key] || {};
       // Mocking metrics for POC based on presence in Dump
-      const finRow = dumpData.find(d => String(d['Project Key'] || d['Project']).trim().toUpperCase() === key) || {};
+      const finRow = dumpData.find(d => String(d['__DerivedKey'] || d['Project Key'] || d['Project']).trim().toUpperCase() === key) || {};
 
-      const rev = parseFloat(finRow['Revenue'] || finRow['Total Revenue'] || '100000');
-      const cost = parseFloat(finRow['Cost'] || finRow['Total Cost'] || '50000');
+      const rev = parseFloat(p['Revenue FY25'] || p['Revenue FY26'] || p['PO Amount'] || finRow['Revenue'] || finRow['Total Revenue'] || '0');
+      const cost = parseFloat(finRow['Cost'] || finRow['Total Cost'] || '0');
 
       legacyReport.push({
         projectKey: key,

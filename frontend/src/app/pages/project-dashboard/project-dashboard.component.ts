@@ -7,6 +7,8 @@ import { DataProcessingService } from '../../services/data-processing.service';
 import { CategoryCardComponent } from '../../components/category-card/category-card.component';
 import { PerformanceLedgerComponent } from '../../components/performance-ledger/performance-ledger.component';
 import { environment } from '../../../environments/environment';
+import { FilterService } from '../../services/filter.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-project-dashboard',
@@ -34,78 +36,7 @@ import { environment } from '../../../environments/environment';
     </div>
 
     <ng-container *ngIf="data">
-      <!-- Dynamic Filter Bar -->
-      <div class="filter-bar" [style.opacity]="loading ? '0.5' : '1'">
-          <div class="filter-group">
-              <label>Financial Year</label>
-              <select [(ngModel)]="filters.year" (change)="applyFilters()">
-                  <option value="All">All Years</option>
-                  <option value="FY25">FY 2024-25</option>
-                  <option value="FY26">FY 2025-26</option>
-              </select>
-          </div>
-          <div class="filter-group">
-              <label>Quarter</label>
-              <select [(ngModel)]="filters.quarter" (change)="onQuarterChange()">
-                  <option value="All">All Quarters</option>
-                  <option value="Q1">Q1 (Apr-Jun)</option>
-                  <option value="Q2">Q2 (Jul-Sep)</option>
-                  <option value="Q3">Q3 (Oct-Dec)</option>
-                  <option value="Q4">Q4 (Jan-Mar)</option>
-              </select>
-          </div>
-          <div class="filter-group">
-              <label>Month</label>
-              <select [(ngModel)]="filters.month" (change)="applyFilters()">
-                  <option value="All">All Months</option>
-                  <option *ngFor="let m of availableMonths" [value]="m">{{m}}</option>
-              </select>
-          </div>
-          <div class="filter-group">
-              <label>Category</label>
-              <select [(ngModel)]="filters.category" (change)="applyFilters()">
-                  <option value="All">All Categories</option>
-                  <option *ngFor="let c of categories" [value]="c">{{c}}</option>
-              </select>
-          </div>
-          <div style="flex: 0;">
-              <button (click)="resetFilters()" class="btn-ghost" style="padding: 10px 16px;">Reset</button>
-          </div>
-      </div>
-
-      <!-- KPI Panels -->
-      <div class="kpi-row" [style.opacity]="loading ? '0.5' : '1'">
-          <div class="kpi-panel">
-              <div class="tag">Net Revenue</div>
-              <div class="amount">{{ dataProc.formatCurrency(summary.totalRevenue) }}</div>
-              <div class="growth" style="color: #10b981;">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                      <path d="m18 15-6-6-6 6" />
-                  </svg>
-                  Portfolio Total
-              </div>
-          </div>
-          <div class="kpi-panel">
-              <div class="tag">Fully Loaded Cost</div>
-              <div class="amount">{{ dataProc.formatCurrency(summary.totalFullyLoaded) }}</div>
-              <div class="growth" style="color: var(--text-muted);">
-                  Include Indirect Allocations
-              </div>
-          </div>
-          <div class="kpi-panel">
-              <div class="tag">Gross Profit</div>
-              <div class="amount">{{ dataProc.formatCurrency(summary.totalProfit) }}</div>
-              <div class="growth">Realized Earnings</div>
-          </div>
-          <div class="kpi-panel">
-              <div class="tag">Operating Margin</div>
-              <div class="amount">{{ (summary.avgMargin * 100).toFixed(1) }}%</div>
-              <div class="growth">
-                  <span class="badge-pill" [ngClass]="dataProc.getMarginClass(summary.avgMargin)">Portfolio Average</span>
-              </div>
-          </div>
-      </div>
-
+    <ng-container *ngIf="data">
       <!-- Content Area toggle between Cards & Ledger -->
       <div class="data-table-container" style="margin-top: 24px;" [style.opacity]="loading ? '0.5' : '1'">
           <div style="padding: 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
@@ -152,74 +83,51 @@ export class ProjectDashboardComponent implements OnInit {
   data: any = null;
   loading = false;
 
-  categories: string[] = ['Implementation', 'Support', 'Consulting']; // default, overwritten by metadata
-  availableMonths: string[] = [];
-
-  filters = {
+  filters: any = {
     year: 'All',
     quarter: 'All',
     month: 'All',
-    category: 'All'
+    projectCategory: [],
+    searchQuery: ''
   };
 
   summary: any = {};
   filteredLedgerData: any[] = [];
   categoryCards: any[] = [];
+  selectedCategory: string | null = null; 
 
-  selectedCategory: string | null = null; // null means show cards
+  private filterSub: Subscription | null = null;
 
   constructor(
     private api: FinanceApiService,
-    public dataProc: DataProcessingService
+    public dataProc: DataProcessingService,
+    private filterService: FilterService
   ) { }
 
   async ngOnInit() {
-    this.loadFromCache();
-    await this.fetchMetadata();
+    // Subscribe to global filters
+    this.filterSub = this.filterService.currentFilter$.subscribe(f => {
+      this.filters = f;
+      this.applyFilters();
+    });
   }
 
-  loadFromCache() {
-    const stored = localStorage.getItem('pl_dashboard_results');
-    if (stored) {
-      try {
-        this.data = JSON.parse(stored);
-        this.processData();
-      } catch (e) {
-        console.error('Failed to parse cached data', e);
-      }
-    }
-  }
-
-  async fetchMetadata() {
-    try {
-      const meta = await this.api.getMetadata();
-      if (meta && meta.categories) {
-        this.categories = meta.categories;
-      }
-    } catch (e) {
-      console.error('Failed to fetch metadata', e);
-    }
+  ngOnDestroy() {
+    if (this.filterSub) this.filterSub.unsubscribe();
   }
 
   async applyFilters() {
     this.loading = true;
     try {
-      // Re-fetch calculations based on server filters (Year, Quarter, Month)
       const newData = await this.api.calculateReport({
         year: this.filters.year,
         quarter: this.filters.quarter,
         month: this.filters.month
       });
       this.data = newData;
-      localStorage.setItem('pl_dashboard_results', JSON.stringify(newData));
       this.processData();
-
-      // Ensure if we are inside a category, and we filter and it has no projects, it still works
-      if (this.selectedCategory) {
-        this.openCategory(this.selectedCategory);
-      }
     } catch (err) {
-      alert('Failed to calculate report with these filters');
+      console.error('Failed to calculate report', err);
     } finally {
       this.loading = false;
     }
@@ -228,54 +136,41 @@ export class ProjectDashboardComponent implements OnInit {
   processData() {
     if (!this.data || !this.data.report) return;
 
-    // Apply Client-Side Category Filter
     let report = this.data.report;
-    if (this.filters.category !== 'All') {
-      report = report.filter((r: any) => r.category === this.filters.category);
+    
+    // Client-side Category Multi-select Filter
+    if (this.filters.projectCategory && this.filters.projectCategory.length > 0) {
+      report = report.filter((r: any) => this.filters.projectCategory.includes(r.category));
+    }
+
+    // Search query filter
+    if (this.filters.searchQuery) {
+      const q = this.filters.searchQuery.toLowerCase();
+      report = report.filter((r: any) => 
+        r.project?.toLowerCase().includes(q) || 
+        r.projectKey?.toLowerCase().includes(q)
+      );
     }
 
     this.summary = this.dataProc.calculateFilteredSummary(report);
-    // Feed the cards data the unfiltered global report if we want to see all categories?
-    // Instruction didn't specify, but usually if global filter is set to Category X, you only see Card X.
     this.categoryCards = this.dataProc.getCategoryCardsData(report);
-    this.filteredLedgerData = report; // used if we skip cards
+    
+    if (this.selectedCategory) {
+      this.filteredLedgerData = report.filter((r: any) => r.category === this.selectedCategory);
+    } else {
+      this.filteredLedgerData = report;
+    }
   }
 
   openCategory(categoryName: string) {
     this.selectedCategory = categoryName;
-    // Further filter the already processed report by this specific category 
-    // (useful if global filter is All, but we clicked a specific card)
-    let baseReport = this.data.report;
-    if (this.filters.category !== 'All') {
-      baseReport = baseReport.filter((r: any) => r.category === this.filters.category);
-    }
-    this.filteredLedgerData = baseReport.filter((r: any) => r.category === categoryName);
-  }
-
-  onQuarterChange() {
-    const qMap: any = {
-      'Q1': ['Apr', 'May', 'Jun'],
-      'Q2': ['Jul', 'Aug', 'Sep'],
-      'Q3': ['Oct', 'Nov', 'Dec'],
-      'Q4': ['Jan', 'Feb', 'Mar']
-    };
-    this.availableMonths = qMap[this.filters.quarter] || [];
-    this.filters.month = 'All';
-    this.applyFilters();
-  }
-
-  resetFilters() {
-    this.filters = { year: 'All', quarter: 'All', month: 'All', category: 'All' };
-    this.availableMonths = [];
-    this.applyFilters();
+    this.processData();
   }
 
   async resetEnvironment() {
     if (confirm('Are you sure you want to clear all data? This will reset the state on the server.')) {
       try {
-        await fetch(`${environment.apiUrl}/api/clear-data`, { method: 'POST' }); // Using plain fetch for quick clear
-        localStorage.removeItem('pl_dashboard_results');
-        localStorage.removeItem('res_dashboard_results');
+        await fetch(`${environment.apiUrl}/api/clear-data`, { method: 'POST' }); 
         alert('Data cleared successfully.');
         window.location.href = '/';
       } catch (err: any) {
@@ -286,8 +181,7 @@ export class ProjectDashboardComponent implements OnInit {
 
   exportCSV() {
     if (!this.data) return;
-    const res = this.data;
-
+    
     const headers = [
       "Project", "Product", "Category", "Project Key", "Status",
       "PO Amount", "Revenue FY25", "Revenue FY26", "Cumulative Revenue", "Budget To Go",
@@ -298,9 +192,7 @@ export class ProjectDashboardComponent implements OnInit {
     ];
 
     let csv = headers.join(',') + '\n';
-
-    // Export the data visible on screen based on card or filters
-    const exportData = this.selectedCategory ? this.filteredLedgerData : this.data.report.filter((r: any) => this.filters.category === 'All' || r.category === this.filters.category);
+    const exportData = this.selectedCategory ? this.filteredLedgerData : this.data.report;
 
     exportData.forEach((row: any) => {
       const values = [

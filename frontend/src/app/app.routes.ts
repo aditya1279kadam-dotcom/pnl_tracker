@@ -4,6 +4,7 @@ import { SyncCenterComponent } from './pages/sync-center/sync-center.component';
 import { ProjectDashboardComponent } from './pages/project-dashboard/project-dashboard.component';
 import { ResourceDashboardComponent } from './pages/resource-dashboard/resource-dashboard.component';
 import { DefaultersReportComponent } from './pages/defaulters-report/defaulters-report.component';
+import { InsightsDashboardComponent } from './pages/insights-dashboard/insights-dashboard.component';
 
 export const routes: Routes = [
     {
@@ -14,6 +15,7 @@ export const routes: Routes = [
             { path: 'project-dashboard', component: ProjectDashboardComponent },
             { path: 'resource-dashboard', component: ResourceDashboardComponent },
             { path: 'defaulters-report', component: DefaultersReportComponent },
+            { path: 'insights', component: InsightsDashboardComponent },
         ]
     },
     { path: '**', redirectTo: '' }

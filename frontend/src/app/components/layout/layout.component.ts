@@ -1,14 +1,16 @@
 import { Component, HostListener } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
+import { GlobalFilterComponent } from '../global-filter/global-filter.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent],
+  imports: [RouterOutlet, SidebarComponent, GlobalFilterComponent],
   template: `
     <app-sidebar #sidebar></app-sidebar>
     <main class="main-content">
+       <app-global-filter></app-global-filter>
        <router-outlet (activate)="onActivate($event, sidebar)"></router-outlet>
     </main>
   `,

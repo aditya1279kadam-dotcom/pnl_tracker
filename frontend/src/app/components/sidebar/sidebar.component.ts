@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -60,6 +60,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           </svg>
           <span>Jira Defaulter's List</span>
         </a>
+        <a routerLink="/insights" routerLinkActive="active" class="nav-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+              <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+          </svg>
+          <span>Actionable Insights</span>
+        </a>
       </div>
     </aside>
   `,
@@ -87,6 +94,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     }
     .sidebar-overlay {
       display: none;
+    }
+    .sidebar-overlay.open {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 99;
     }
     .close-sidebar {
       display: none;
@@ -165,16 +179,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         transform: translateX(0);
         box-shadow: 4px 0 24px rgba(0,0,0,0.1);
       }
-      .sidebar-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.3);
-        z-index: 99;
-      }
-      .sidebar-overlay.open {
-        display: block;
-      }
       .close-sidebar {
         display: flex;
         align-items: center;
@@ -195,8 +199,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     }
   `]
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   isOpen = false;
+
+  ngOnInit() {
+    window.addEventListener('toggleSidebar', () => {
+      this.isOpen = !this.isOpen;
+    });
+  }
 
   closeSidebar() {
     this.isOpen = false;

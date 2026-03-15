@@ -91,3 +91,4 @@ C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backe
 C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.pdb
 C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.genruntimeconfig.cache
 C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\ref\FinanceOS.Backend.dll
+C:\Users\Aditya Kadam\Downloads\finance-os-master\finance-os-master\dotnet-backend\obj\Debug\net10.0\FinanceOS.Backend.sourcelink.json
