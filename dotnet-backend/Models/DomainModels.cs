@@ -24,7 +24,7 @@ namespace FinanceOS.Backend.Models
         [Name("Started Day")]
         [Optional]
         public DateTime? Date { get; set; }
-        [Name("Time Spent (hours)")]
+        [Name("Time Spent (hours)", "Time Spent ( in hours)", "Time Spent in hours")]
         [Optional]
         public double TimeSpentHrs { get; set; }
         

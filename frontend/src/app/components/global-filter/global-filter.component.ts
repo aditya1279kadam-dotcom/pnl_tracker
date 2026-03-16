@@ -130,10 +130,10 @@ export class GlobalFilterComponent implements OnInit {
 
   onQuarterChange() {
     const qMap: any = {
-      'Q1': ['Apr', 'May', 'Jun'],
-      'Q2': ['Jul', 'Aug', 'Sep'],
-      'Q3': ['Oct', 'Nov', 'Dec'],
-      'Q4': ['Jan', 'Feb', 'Mar']
+      'Q1': ['April', 'May', 'June'],
+      'Q2': ['July', 'August', 'September'],
+      'Q3': ['October', 'November', 'December'],
+      'Q4': ['January', 'February', 'March']
     };
     this.availableMonths = qMap[this.localFilter.quarter] || [];
     this.localFilter.month = 'All';

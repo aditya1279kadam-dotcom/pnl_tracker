@@ -36,7 +36,32 @@ import { Subscription } from 'rxjs';
     </div>
 
     <ng-container *ngIf="data">
-    <ng-container *ngIf="data">
+      <!-- KPI Highlight Cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 24px;">
+        <div class="card" style="padding: 24px; border: 1px solid var(--border); border-radius: 20px; background: rgba(255,255,255,0.02);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; margin-bottom: 8px;">Total Portfolio Revenue</div>
+          <div style="font-size: 1.75rem; font-weight: 900; color: var(--text-bright);">{{ dataProc.formatCurrency(summary.totalRevenue) }}</div>
+        </div>
+        
+        <div class="card" [style.background]="summary.avgMargin > 0.3 ? 'rgba(16, 185, 129, 0.05)' : 'rgba(245, 158, 11, 0.05)'"
+             style="padding: 24px; border: 1px solid var(--border); border-radius: 20px;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; margin-bottom: 8px;">Weighted Avg Margin</div>
+          <div style="font-size: 1.75rem; font-weight: 900;" [style.color]="summary.avgMargin > 0.3 ? '#10b981' : '#f59e0b'">
+            {{ (summary.avgMargin * 100).toFixed(2) }}%
+          </div>
+        </div>
+
+        <div class="card" style="padding: 24px; border: 1px solid var(--border); border-radius: 20px; background: rgba(255,255,255,0.02);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; margin-bottom: 8px;">Direct Cost Basis</div>
+          <div style="font-size: 1.75rem; font-weight: 900; color: var(--text-bright);">{{ dataProc.formatCurrency(summary.totalDirectCost) }}</div>
+        </div>
+
+        <div class="card" style="padding: 24px; border: 1px solid var(--border); border-radius: 20px; background: rgba(255,255,255,0.02);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; margin-bottom: 8px;">Total Portfolios</div>
+          <div style="font-size: 1.75rem; font-weight: 900; color: var(--text-bright);">{{ categoryCards.length }} Groups</div>
+        </div>
+      </div>
+
       <!-- Content Area toggle between Cards & Ledger -->
       <div class="data-table-container" style="margin-top: 24px;" [style.opacity]="loading ? '0.5' : '1'">
           <div style="padding: 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">

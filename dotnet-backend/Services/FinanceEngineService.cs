@@ -38,7 +38,10 @@ namespace FinanceOS.Backend.Services
     {
         public FinanceCalculationResult Process(FinanceInputData data)
         {
-            var processedJira = ProcessJiraDump(data.JiraDump, data.RateCard, data.ResourceList, data.Filters);
+            var (periodStart, periodEnd) = GetPeriodBounds(data.Filters);
+            var filteredJira = data.JiraDump.Where(j => j.Date.HasValue && j.Date >= periodStart && j.Date <= periodEnd).ToList();
+            
+            var processedJira = ProcessJiraDump(filteredJira, data.RateCard, data.ResourceList, data.Filters, periodStart, periodEnd);
             
             // Only consider billable projects for allocation basis
             var billableCategories = new[] { "implementation", "cr", "support", "consulting", "valuation", "external" };
@@ -76,11 +79,10 @@ namespace FinanceOS.Backend.Services
             };
         }
 
-        private List<JiraWorklog> ProcessJiraDump(List<JiraWorklog> jiraDump, List<RateCardEntry> rateCard, List<ResourceEntry> resourceList, CalculationFilters filters)
+        private List<JiraWorklog> ProcessJiraDump(List<JiraWorklog> jiraDump, List<RateCardEntry> rateCard, List<ResourceEntry> resourceList, CalculationFilters filters, DateTime periodStart, DateTime periodEnd)
         {
             var rateMap = rateCard.Where(r => !string.IsNullOrEmpty(r.Name)).ToDictionary(r => r.Name, r => r);
             var resourceMap = resourceList.Where(r => !string.IsNullOrEmpty(r.Name)).ToDictionary(r => r.Name, r => r);
-            var (periodStart, periodEnd) = GetPeriodBounds(filters);
 
             var authorTotalHours = jiraDump.GroupBy(j => j.Author)
                 .ToDictionary(g => g.Key, g => g.Sum(j => j.TimeSpentHrs));
@@ -127,7 +129,7 @@ namespace FinanceOS.Backend.Services
                     var dt = row.Date.Value;
                     var y = dt.Month >= 4 ? dt.Year + 1 : dt.Year;
                     var q = ((dt.Month - 4 + 12) % 12) / 3 + 1;
-                    row.QuarterKey = $"FY{y}-Q{q}";
+                    row.QuarterKey = $"FY{y % 100}-Q{q}";
                 }
                 
                 // Fake mapping for now, should ideally map via external rules
@@ -139,9 +141,37 @@ namespace FinanceOS.Backend.Services
 
         private (DateTime start, DateTime end) GetPeriodBounds(CalculationFilters filters)
         {
-            // Naive period bounds for now (always current month if not specified, else year logic)
-            var start = new DateTime(2024, 4, 1);
-            var end = DateTime.Now;
+            int year = 0;
+            if (filters.Year.StartsWith("FY") && int.TryParse(filters.Year.Substring(2), out int fyNum)) {
+                // FY26 ends in 2026, so starts April 2025
+                year = 2000 + fyNum;
+            } else {
+                year = DateTime.Now.Month >= 4 ? DateTime.Now.Year + 1 : DateTime.Now.Year;
+            }
+
+            var start = new DateTime(year - 1, 4, 1);
+            var end = new DateTime(year, 3, 31);
+
+            if (filters.Quarter != "All" && filters.Quarter.StartsWith("Q")) {
+                int q = int.Parse(filters.Quarter.Substring(1));
+                // Q1: Apr-Jun, Q2: Jul-Sep, Q3: Oct-Dec, Q4: Jan-Mar
+                if (q == 1) { start = new DateTime(year - 1, 4, 1); end = new DateTime(year - 1, 6, 30); }
+                else if (q == 2) { start = new DateTime(year - 1, 7, 1); end = new DateTime(year - 1, 9, 30); }
+                else if (q == 3) { start = new DateTime(year - 1, 10, 1); end = new DateTime(year - 1, 12, 31); }
+                else if (q == 4) { start = new DateTime(year, 1, 1); end = new DateTime(year, 3, 31); }
+            }
+
+            if (filters.Month != "All") {
+                int mNum = 0;
+                var months = new[] { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+                mNum = Array.IndexOf(months, filters.Month) + 1;
+                if (mNum > 0) {
+                    int mYear = (mNum >= 4) ? year - 1 : year;
+                    start = new DateTime(mYear, mNum, 1);
+                    end = start.AddMonths(1).AddDays(-1);
+                }
+            }
+
             return (start, end);
         }
 

@@ -179,11 +179,11 @@ export class DataProcessingService {
   // --- LEGACY UTILITIES PRESERVED FOR DASHBOARDS ---
 
   calculateFilteredSummary(report: any[]) {
-    const totalRevenue = report.reduce((sum, r) => sum + r.revenue, 0);
-    const totalFullyLoaded = report.reduce((sum, r) => sum + r.fullyLoadedCost, 0);
+    const totalRevenue = report.reduce((sum, r) => sum + (r.cumulativeRevenue || r.revenue || 0), 0);
+    const totalFullyLoaded = report.reduce((sum, r) => sum + (r.totalFullyLoadedCost || r.fullyLoadedCost || 0), 0);
     return {
       totalRevenue,
-      totalDirectCost: report.reduce((sum, r) => sum + r.directCost, 0),
+      totalDirectCost: report.reduce((sum, r) => sum + (r.directCost || 0), 0),
       totalFullyLoaded,
       totalProfit: totalRevenue - totalFullyLoaded,
       avgMargin: totalRevenue > 0 ? ((totalRevenue - totalFullyLoaded) / totalRevenue) : 0
@@ -191,12 +191,17 @@ export class DataProcessingService {
   }
 
   getCategoryCardsData(report: any[]) {
+    const requiredCategories = ['Implementation', 'Support', 'Consulting', 'CR', 'Valuation', 'External', 'CAAPL'];
     const catMap: Record<string, { profit: number, revenue: number }> = {};
+    
+    // Initialize with zeros for all required categories
+    requiredCategories.forEach(cat => catMap[cat] = { profit: 0, revenue: 0 });
 
     report.forEach(r => {
-      if (!catMap[r.category]) catMap[r.category] = { profit: 0, revenue: 0 };
-      catMap[r.category].profit += r.grossProfit;
-      catMap[r.category].revenue += r.revenue;
+      const cat = r.category || 'Consulting';
+      if (!catMap[cat]) catMap[cat] = { profit: 0, revenue: 0 };
+      catMap[cat].profit += (r.grossProfit || 0);
+      catMap[cat].revenue += (r.cumulativeRevenue || r.revenue || 0);
     });
 
     return Object.keys(catMap).map(category => {

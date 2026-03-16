@@ -50,6 +50,7 @@ namespace FinanceOS.Backend.Services
 
             var qcReport = new QCReport();
             var (periodStart, periodEnd) = GetPeriodBounds(filters);
+            var filteredJira = jiraDump.Where(j => j.Date.HasValue && j.Date >= periodStart && j.Date <= periodEnd).ToList();
             var workingDaysInPeriod = GetWorkingDays(periodStart, periodEnd);
 
             // 1. Initialize resource map
@@ -57,7 +58,7 @@ namespace FinanceOS.Backend.Services
             var rateMap = rateCard.Where(r => !string.IsNullOrEmpty(r.Name))
                                   .ToDictionary(r => r.Name.Trim(), r => r.Function ?? "Unknown");
 
-            var jiraAuthors = jiraDump.Select(j => (j.Author ?? "").Trim()).Where(a => !string.IsNullOrEmpty(a)).Distinct().ToHashSet();
+            var jiraAuthors = filteredJira.Select(j => (j.Author ?? "").Trim()).Where(a => !string.IsNullOrEmpty(a)).Distinct().ToHashSet();
 
             foreach (var row in resourceMaster)
             {
@@ -82,7 +83,7 @@ namespace FinanceOS.Backend.Services
                     FormalName = formalName,
                     Function = func,
                     RequiredHours = reqH,
-                    MissingJiraID = missingJiraId // "Please create Jira ID" flag logic
+                    MissingJiraID = missingJiraId 
                 };
             }
 
@@ -92,18 +93,18 @@ namespace FinanceOS.Backend.Services
                     resources[author] = new ResourceReportRow {
                         ResourceName = author,
                         FormalName = author,
-                        RequiredHours = workingDaysInPeriod * 8, // they logged time without being in list
+                        RequiredHours = workingDaysInPeriod * 8, 
                         MissingJiraID = false
                     };
                 }
             }
 
             // Tracking total uncapped for each author
-            var totalUncappedJira = jiraDump.GroupBy(j => j.Author?.Trim() ?? "")
-                                            .ToDictionary(g => g.Key, g => g.Sum(j => j.TimeSpentHrs));
+            var totalUncappedJira = filteredJira.GroupBy(j => j.Author?.Trim() ?? "")
+                                             .ToDictionary(g => g.Key, g => g.Sum(j => j.TimeSpentHrs));
 
             // 3. Process Jira and map categories
-            foreach (var row in jiraDump)
+            foreach (var row in filteredJira)
             {
                 var author = (row.Author ?? "").Trim();
                 if (string.IsNullOrEmpty(author) || !resources.ContainsKey(author)) continue;
@@ -190,6 +191,16 @@ namespace FinanceOS.Backend.Services
                 else if (authTotalUncapped == 0) flag = "No logs";
                 else if (missingHours > 0) flag = "Partial logs";
 
+                // Mismatch Logic: if Jira leaves differ from Attendance leaves
+                if (Math.Abs(r.ActualLeaveDays * 8 - r.Leaves_Hours_Jira) > 4) {
+                    qcReport.FailedCrossChecks.Add(new {
+                        ResourceName = r.FormalName,
+                        JiraLeaves = r.Leaves_Hours_Jira,
+                        AttendanceLeaves = r.ActualLeaveDays * 8,
+                        Issue = "Leaves Mismatch"
+                    });
+                }
+
                 if (!string.IsNullOrEmpty(flag)) {
                     qcReport.Defaulters.Add(new {
                         ResourceName = r.FormalName,
@@ -203,7 +214,6 @@ namespace FinanceOS.Backend.Services
                 reportData.Add(r);
             }
 
-            // Sort defaulters ascending by filled time spent (JiraTotalHours) as per spec
             qcReport.Defaulters = qcReport.Defaulters.OrderBy(d => (double)d.GetType().GetProperty("JiraTotalHours").GetValue(d, null)).ToList();
             
             // 6. Summary Aggregates
@@ -224,7 +234,7 @@ namespace FinanceOS.Backend.Services
 
             return new ResourceCalculationResult
             {
-                ReportData = reportData,
+                ReportData = reportData.OrderBy(r => r.ResourceName).ToList(),
                 Summary = summary,
                 QcReport = qcReport
             };
@@ -232,8 +242,33 @@ namespace FinanceOS.Backend.Services
 
         private (DateTime start, DateTime end) GetPeriodBounds(CalculationFilters filters)
         {
-            var start = new DateTime(2024, 4, 1);
-            var end = DateTime.Now;
+            int year = 0;
+            if (filters.Year.StartsWith("FY") && int.TryParse(filters.Year.Substring(2), out int fyNum)) {
+                year = 2000 + fyNum;
+            } else {
+                year = DateTime.Now.Month >= 4 ? DateTime.Now.Year + 1 : DateTime.Now.Year;
+            }
+
+            var start = new DateTime(year - 1, 4, 1);
+            var end = new DateTime(year, 3, 31);
+
+            if (filters.Quarter != "All" && filters.Quarter.StartsWith("Q")) {
+                int q = int.Parse(filters.Quarter.Substring(1));
+                if (q == 1) { start = new DateTime(year - 1, 4, 1); end = new DateTime(year - 1, 6, 30); }
+                else if (q == 2) { start = new DateTime(year - 1, 7, 1); end = new DateTime(year - 1, 9, 30); }
+                else if (q == 3) { start = new DateTime(year - 1, 10, 1); end = new DateTime(year - 1, 12, 31); }
+                else if (q == 4) { start = new DateTime(year, 1, 1); end = new DateTime(year, 3, 31); }
+            }
+
+            if (filters.Month != "All") {
+                var months = new[] { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+                int mNum = Array.IndexOf(months, filters.Month) + 1;
+                if (mNum > 0) {
+                    int mYear = (mNum >= 4) ? year - 1 : year;
+                    start = new DateTime(mYear, mNum, 1);
+                    end = start.AddMonths(1).AddDays(-1);
+                }
+            }
             return (start, end);
         }
 
