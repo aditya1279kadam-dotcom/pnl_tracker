@@ -10,9 +10,9 @@ namespace FinanceOS.Backend.Controllers
         [HttpGet("extract")]
         public async Task Extract()
         {
-            Response.Headers.Add("Content-Type", "text/event-stream");
-            Response.Headers.Add("Cache-Control", "no-cache");
-            Response.Headers.Add("Connection", "keep-alive");
+            Response.Headers["Content-Type"] = "text/event-stream";
+            Response.Headers["Cache-Control"] = "no-cache";
+            Response.Headers["Connection"] = "keep-alive";
 
             var steps = new[] { "Authentication", "Fetching Issues", "Processing Worklogs", "Finalizing" };
             for (int i = 0; i < steps.Length; i++)

@@ -56,7 +56,9 @@ namespace FinanceOS.Backend.Services
             {
                 using var workbook = new XLWorkbook(stream);
                 var worksheet = workbook.Worksheets.First();
-                var rows = worksheet.RangeUsed().RowsUsed().ToList();
+                var range = worksheet.RangeUsed();
+                if (range == null) return new List<Dictionary<string, object>>();
+                var rows = range.RowsUsed().ToList();
                 var headerRow = rows.First();
                 var headers = headerRow.Cells().Select(c => c.Value.ToString().ToLower().Replace(" ", "")).ToList();
 

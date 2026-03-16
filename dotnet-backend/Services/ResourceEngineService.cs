@@ -224,10 +224,10 @@ namespace FinanceOS.Backend.Services
 
             var summary = new ResourceSummary
             {
-                AvgOverallBillability = filteredOv.Any() ? filteredOv.Average(r => r.OverallBillability.Value) : 0,
-                AvgExternalProductivity = filteredExt.Any() ? filteredExt.Average(r => r.ExternalProductivity.Value) : 0,
-                AvgInternalProductivity = filteredInt.Any() ? filteredInt.Average(r => r.InternalProductivity.Value) : 0,
-                AvgBench = filteredBench.Any() ? filteredBench.Average(r => r.BenchPercent.Value) : 0,
+                AvgOverallBillability = filteredOv.Any() ? filteredOv.Average(r => r.OverallBillability ?? 0) : 0,
+                AvgExternalProductivity = filteredExt.Any() ? filteredExt.Average(r => r.ExternalProductivity ?? 0) : 0,
+                AvgInternalProductivity = filteredInt.Any() ? filteredInt.Average(r => r.InternalProductivity ?? 0) : 0,
+                AvgBench = filteredBench.Any() ? filteredBench.Average(r => r.BenchPercent ?? 0) : 0,
                 TopResources = reportData.OrderByDescending(r => r.RequiredHours).Take(10).ToList(),
                 BottomBillability = reportData.Where(r => r.OverallBillability.HasValue).OrderBy(r => r.OverallBillability).Take(10).ToList()
             };

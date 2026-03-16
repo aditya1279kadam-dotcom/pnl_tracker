@@ -36,7 +36,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// HttpsRedirection removed: app runs HTTP-only on localhost
 app.UseCors("AllowAngular");
 
 // Serve uploads folder as static files (optional, mirroring Node behavior)
