@@ -58,9 +58,19 @@ export class FinanceApiService {
   }
 
   async syncAllFiles(files: { [key: string]: File | null }): Promise<any> {
+    const typeMapping: { [key: string]: string } = {
+      'dump': 'jiradump',
+      'resourceList': 'resourcelist',
+      'projectMaster': 'projectmaster',
+      'rateCard': 'ratecard',
+      'attendance': 'attendance',
+      'overhead': 'overhead' // Optional if backend handles it
+    };
+
     const promises = Object.entries(files).map(([type, file]) => {
       if (file) {
-        return this.uploadFile(type, file);
+        const backendType = typeMapping[type] || type;
+        return this.uploadFile(backendType, file);
       }
       return Promise.resolve();
     });
